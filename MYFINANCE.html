@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro com Limites</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --text: #2c3e50;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+
+        .saldo-container {
+            text-align: right;
+        }
+
+        .saldo-total {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .saldo-positivo {
+            color: var(--success);
+        }
+
+        .saldo-negativo {
+            color: var(--danger);
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--light);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--light);
+            color: var(--primary);
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .transacao-receita {
+            border-left: 4px solid var(--success);
+        }
+
+        .transacao-despesa {
+            border-left: 4px solid var(--danger);
+        }
+
+        .acoes {
+            display: flex;
+            gap: 5px;
+        }
+
+        .categoria-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .categoria-item:last-child {
+            border-bottom: none;
+        }
+
+        .categoria-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .categoria-icon {
+            width: 30px;
+            text-align: center;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filtro-item {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .progresso-limite {
+            margin-top: 5px;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .progresso-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progresso-seguro {
+            background-color: var(--success);
+        }
+
+        .progresso-alerta {
+            background-color: var(--warning);
+        }
+
+        .progresso-perigo {
+            background-color: var(--danger);
+        }
+
+        .limite-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .limite-excedido {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .categoria-limite {
+            width: 150px;
+            text-align: right;
+        }
+
+        .alerta-limite {
+            background-color: #fff3cd;
+            border-left: 4px solid var(--warning);
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+        }
+
+        .alerta-perigo {
+            background-color: #f8d7da;
+            border-left: 4px solid var(--danger);
+        }
+
+        .resumo-categorias {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .resumo-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .resumo-item.excedido {
+            border-left-color: var(--danger);
+        }
+
+        .resumo-item.titulo {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .resumo-item.valor {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .resumo-item.porcentagem {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .close:hover {
+            color: var(--danger);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .estatisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .estatistica-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .estatistica-valor {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .estatistica-titulo {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>Controle Financeiro com Limites</h1>
+                </div>
+                <div class="saldo-container">
+                    <div>Saldo Total</div>
+                    <div class="saldo-total saldo-positivo" id="saldoTotal">R$ 0,00</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="transacoes">Transações</div>
+            <div class="tab" data-tab="categorias">Categorias e Limites</div>
+            <div class="tab" data-tab="relatorios">Relatórios</div>
+        </div>
+
+        <!-- ABA: TRANSAÇÕES -->
+        <div class="tab-content active" id="transacoes-tab">
+            <div class="grid">
+                <!-- Formulário de Transação -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Nova Transação
+                    </h2>
+                    <form id="formTransacao">
+                        <div class="form-group">
+                            <label for="tipo">Tipo</label>
+                            <select id="tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria">Categoria</label>
+                            <select id="categoria" required>
+                                <option value="">Selecione o tipo primeiro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="descricao">Descrição</label>
+                            <input type="text" id="descricao" placeholder="Ex: Salário, Aluguel..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="valor">Valor (R$)</label>
+                            <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="data">Data</label>
+                            <input type="date" id="data" required>
+                        </div>
+                        <div class="btn-container">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Adicionar
+                            </button>
+                            <button type="button" class="btn btn-danger" id="btnLimpar">
+                                <i class="fas fa-broom"></i>
+                                Limpar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Lista de Transações -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-list"></i>
+                        Últimas Transações
+                    </h2>
+                    
+                    <!-- Filtros -->
+                    <div class="filtros">
+                        <div class="filtro-item">
+                            <label for="filtroTipo">Tipo</label>
+                            <select id="filtroTipo">
+                                <option value="">Todos</option>
+                                <option value="receita">Receitas</option>
+                                <option value="despesa">Despesas</option>
+                            </select>
+                        </div>
+                        <div class="filtro-item">
+                            <label for="filtroCategoria">Categoria</label>
+                            <select id="filtroCategoria">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <div class="filtro-item">
+                            <label for="filtroDataInicio">Data Início</label>
+                            <input type="date" id="filtroDataInicio">
+                        </div>
+                        <div class="filtro-item">
+                            <label for="filtroDataFim">Data Fim</label>
+                            <input type="date" id="filtroDataFim">
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn btn-info" id="btnAplicarFiltro">
+                            <i class="fas fa-filter"></i>
+                            Aplicar Filtro
+                        </button>
+                        <button class="btn btn-warning" id="btnLimparFiltro">
+                            <i class="fas fa-times"></i>
+                            Limpar Filtro
+                        </button>
+                    </div>
+                    
+                    <div style="overflow-x: auto; margin-top: 1rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaTransacoes">
+                                <!-- Transações serão adicionadas aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alertas de Limite -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Alertas de Limite
+                    </h2>
+                    <div id="alertasLimite">
+                        <!-- Alertas serão adicionados aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA: CATEGORIAS E LIMITES -->
+        <div class="tab-content" id="categorias-tab">
+            <div class="grid">
+                <!-- Gerenciar Categorias -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-tags"></i>
+                        Gerenciar Categorias
+                    </h2>
+                    <div class="btn-container">
+                        <button class="btn btn-success" id="btnNovaCategoria">
+                            <i class="fas fa-plus"></i>
+                            Nova Categoria
+                        </button>
+                        <button class="btn btn-warning" id="btnEditarCategorias">
+                            <i class="fas fa-edit"></i>
+                            Editar Categorias
+                        </button>
+                    </div>
+                    <div id="listaCategorias">
+                        <!-- Categorias serão listadas aqui -->
+                    </div>
+                </div>
+
+                <!-- Resumo de Limites -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Resumo dos Limites
+                    </h2>
+                    <div id="resumoLimites">
+                        <!-- Resumo será adicionado aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA: RELATÓRIOS -->
+        <div class="tab-content" id="relatorios-tab">
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Estatísticas Mensais
+                </h2>
+                <div class="estatisticas">
+                    <div class="estatistica-item">
+                        <div class="estatistica-titulo">Receitas Totais</div>
+                        <div class="estatistica-valor" id="estatisticaReceitas">R$ 0,00</div>
+                    </div>
+                    <div class="estatistica-item">
+                        <div class="estatistica-titulo">Despesas Totais</div>
+                        <div class="estatistica-valor" id="estatisticaDespesas">R$ 0,00</div>
+                    </div>
+                    <div class="estatistica-item">
+                        <div class="estatistica-titulo">Saldo do Mês</div>
+                        <div class="estatistica-valor" id="estatisticaSaldo">R$ 0,00</div>
+                    </div>
+                    <div class="estatistica-item">
+                        <div class="estatistica-titulo">Categorias com Limite</div>
+                        <div class="estatistica-valor" id="estatisticaCategoriasLimite">0</div>
+                    </div>
+                </div>
+
+                <h3 class="card-title">
+                    <i class="fasfa-chart-line"></i>
+                    Desempenho por Categoria
+                </h3>
+                <div id="desempenhoCategorias">
+                    <!-- Gráfico de desempenho será adicionado aqui via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Categorias -->
+    <div id="modalCategoria" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Nova Categoria</h2>
+                <button class="close">&times;</button>
+            </div>
+            <form id="formCategoria">
+                <div class="form-group">
+                    <label for="categoriaTipo">Tipo</label>
+                    <select id="categoriaTipo" required>
+                        <option value="">Selecione...</option>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nomeCategoria">Nome da Categoria</label>
+                    <input type="text" id="nomeCategoria" placeholder="Ex: Salário, Alimentação..." required>
+                </div>
+                <div class="form-group">
+                    <label for="iconeCategoria">Ícone</label>
+                    <select id="iconeCategoria" required>
+                        <option value="">Selecione um ícone...</option>
+                        <option value="fas fa-money-bill-wave">💵 Salário</option>
+                        <option value="fas fa-gift">🎁 Presente</option>
+                        <option value="fas fa-hand-holding-usd">💰 Dinheiro</option>
+                        <option value="fas fa-shopping-cart">🛒 Compras</option>
+                        <option value="fas fa-utensils">🍴 Alimentação</option>
+                        <option value="fas fa-home">🏠 Moradia</option>
+                        <option value="fas fa-car">🚗 Transporte</option>
+                        <option value="fas fa-heartbeat">❤️ Saúde</option>
+                        <option value="fas fa-graduation-cap">🎓 Educação</option>
+                        <option value="fas fa-gamepad">🎮 Lazer</option>
+                        <option value="fas fa-tshirt">👕 Vestuário</option>
+                        <option value="fas fa-wifi">📡 Internet</option>
+                        <option value="fas fa-bolt">⚡ Energia</option>
+                        <option value="fas fa-tint">💧 Água</option>
+                    </select>
+                </div>
+                <div class="form-group" id="grupoLimite">
+                    <label for="limiteCategoria">Limite Mensal (R$)</label>
+                    <input type="number" id="limiteCategoria" step="0.01" min="0" placeholder="0,00 (apenas para despesas)">
+                    <small>Defina um limite de gastos para esta categoria (apenas para despesas)</small>
+                </div>
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i>
+                        Salvar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnCancelarCategoria">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Controle Financeiro com Limites &copy; 2023 - Tenha controle total das suas finanças</p>
+        </div>
+    </footer>
+
+    <script>
+        // Dados iniciais
+        let transacoes = JSON.parse(localStorage.getItem('transacoes')) || [];
+        let categorias = JSON.parse(localStorage.getItem('categorias')) || [
+            { id: 1, tipo: 'receita', nome: 'Salário', icone: 'fas fa-money-bill-wave', limite: null },
+            { id: 2, tipo: 'receita', nome: 'Freelance', icone: 'fas fa-laptop-code', limite: null },
+            { id: 3, tipo: 'receita', nome: 'Investimentos', icone: 'fas fa-chart-line', limite: null },
+            { id: 4, tipo: 'despesa', nome: 'Alimentação', icone: 'fas fa-utensils', limite: 1000 },
+            { id: 5, tipo: 'despesa', nome: 'Transporte', icone: 'fas fa-car', limite: 500 },
+            { id: 6, tipo: 'despesa', nome: 'Moradia', icone: 'fas fa-home', limite: 1500 },
+            { id: 7, tipo: 'despesa', nome: 'Lazer', icone: 'fas fa-gamepad', limite: 300 },
+            { id: 8, tipo: 'despesa', nome: 'Saúde', icone: 'fas fa-heartbeat', limite: 400 }
+        ];
+
+        // Elementos DOM
+        const formTransacao = document.getElementById('formTransacao');
+        const formCategoria = document.getElementById('formCategoria');
+        const listaTransacoes = document.getElementById('listaTransacoes');
+        const listaCategorias = document.getElementById('listaCategorias');
+        const saldoTotal = document.getElementById('saldoTotal');
+        const tipoSelect = document.getElementById('tipo');
+        const categoriaSelect = document.getElementById('categoria');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const btnNovaCategoria = document.getElementById('btnNovaCategoria');
+        const btnEditarCategorias = document.getElementById('btnEditarCategorias');
+        const modalCategoria = document.getElementById('modalCategoria');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const closeModal = document.querySelector('.close');
+        const btnCancelarCategoria = document.getElementById('btnCancelarCategoria');
+        const categoriaTipoSelect = document.getElementById('categoriaTipo');
+        const grupoLimite = document.getElementById('grupoLimite');
+        const limiteCategoriaInput = document.getElementById('limiteCategoria');
+        const alertasLimite = document.getElementById('alertasLimite');
+        const resumoLimites = document.getElementById('resumoLimites');
+        
+        // Elementos de filtro
+        const filtroTipo = document.getElementById('filtroTipo');
+        const filtroCategoria = document.getElementById('filtroCategoria');
+        const filtroDataInicio = document.getElementById('filtroDataInicio');
+        const filtroDataFim = document.getElementById('filtroDataFim');
+        const btnAplicarFiltro = document.getElementById('btnAplicarFiltro');
+        const btnLimparFiltro = document.getElementById('btnLimparFiltro');
+
+        // Elementos de estatísticas
+        const estatisticaReceitas = document.getElementById('estatisticaReceitas');
+        const estatisticaDespesas = document.getElementById('estatisticaDespesas');
+        const estatisticaSaldo = document.getElementById('estatisticaSaldo');
+        const estatisticaCategoriasLimite = document.getElementById('estatisticaCategoriasLimite');
+
+        // Variáveis de filtro
+        let filtrosAtivos = {
+            tipo: '',
+            categoria: '',
+            dataInicio: '',
+            dataFim: ''
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            atualizarCategoriasSelect();
+            atualizarListaTransacoes();
+            atualizarListaCategorias();
+            atualizarSaldo();
+            atualizarFiltroCategorias();
+            atualizarAlertasLimite();
+            atualizarResumoLimites();
+            atualizarEstatisticas();
+            configurarTabs();
+
+            // Definir data atual como padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('data').value = hoje;
+            
+            // Fechar modal se estiver aberto por padrão
+            fecharModal();
+        });
+
+        // Configuração das abas
+        function configurarTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remover classe active de todas as tabs e conteúdos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Adicionar classe active à tab clicada e ao conteúdo correspondente
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // Atualizar dados específicos da aba
+                    if (tabId === 'relatorios') {
+                        atualizarEstatisticas();
+                    } else if (tabId === 'categorias') {
+                        atualizarResumoLimites();
+                    }
+                });
+            });
+        }
+
+        // Event Listeners
+        tipoSelect.addEventListener('change', atualizarCategoriasSelect);
+        categoriaTipoSelect.addEventListener('change', function() {
+            // Mostrar/ocultar campo de limite baseado no tipo
+            if (this.value === 'despesa') {
+                grupoLimite.style.display = 'block';
+            } else {
+                grupoLimite.style.display = 'none';
+                limiteCategoriaInput.value = '';
+            }
+        });
+
+        formTransacao.addEventListener('submit', function(e) {
+            e.preventDefault();
+            adicionarTransacao();
+        });
+
+        btnLimpar.addEventListener('click', function() {
+            formTransacao.reset();
+            document.getElementById('data').value = new Date().toISOString().split('T')[0];
+        });
+
+        btnNovaCategoria.addEventListener('click', function() {
+            abrirModalCategoria('nova');
+        });
+
+        btnEditarCategorias.addEventListener('click', function() {
+            // Para editar categorias, vamos apenas abrir a lista
+            atualizarListaCategorias();
+        });
+
+        // Eventos para fechar o modal
+        closeModal.addEventListener('click', fecharModal);
+        btnCancelarCategoria.addEventListener('click', fecharModal);
+
+        // Fechar modal clicando fora dele
+        modalCategoria.addEventListener('click', function(e) {
+            if (e.target === modalCategoria) {
+                fecharModal();
+            }
+        });
+
+        // Fechar modal com a tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modalCategoria.classList.contains('hidden')) {
+                fecharModal();
+            }
+        });
+
+        formCategoria.addEventListener('submit', function(e) {
+            e.preventDefault();
+            salvarCategoria();
+        });
+
+        // Eventos para filtros
+        btnAplicarFiltro.addEventListener('click', aplicarFiltros);
+        btnLimparFiltro.addEventListener('click', limparFiltros);
+        filtroTipo.addEventListener('change', atualizarFiltroCategorias);
+
+        // Funções
+        function atualizarCategoriasSelect() {
+            const tipo = tipoSelect.value;
+            categoriaSelect.innerHTML = '<option value="">Selecione...</option>';
+            
+            if (tipo) {
+                const categoriasFiltradas = categorias.filter(cat => cat.tipo === tipo);
+                categoriasFiltradas.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    categoriaSelect.appendChild(option);
+                });
+            }
+        }
+
+        function atualizarFiltroCategorias() {
+            const tipo = filtroTipo.value;
+            filtroCategoria.innerHTML = '<option value="">Todas</option>';
+            
+            if (tipo) {
+                const categoriasFiltradas = categorias.filter(cat => cat.tipo === tipo);
+                categoriasFiltradas.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    filtroCategoria.appendChild(option);
+                });
+            } else {
+                // Mostrar todas as categorias
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    filtroCategoria.appendChild(option);
+                });
+            }
+        }
+
+        function aplicarFiltros() {
+            filtrosAtivos = {
+                tipo: filtroTipo.value,
+                categoria: filtroCategoria.value,
+                dataInicio: filtroDataInicio.value,
+                dataFim: filtroDataFim.value
+            };
+            
+            atualizarListaTransacoes();
+        }
+
+        function limparFiltros() {
+            filtroTipo.value = '';
+            filtroCategoria.value = '';
+            filtroDataInicio.value = '';
+            filtroDataFim.value = '';
+            
+            filtrosAtivos = {
+                tipo: '',
+                categoria: '',
+                dataInicio: '',
+                dataFim: ''
+            };
+            
+            atualizarListaTransacoes();
+            atualizarFiltroCategorias();
+        }
+
+        function adicionarTransacao() {
+            const tipo = tipoSelect.value;
+            const categoriaId = parseInt(categoriaSelect.value);
+            const descricao = document.getElementById('descricao').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+            const data = document.getElementById('data').value;
+
+            // Verificar se a categoria existe
+            const categoria = categorias.find(cat => cat.id === categoriaId);
+            if (!categoria) {
+                alert('Por favor, selecione uma categoria válida.');
+                return;
+            }
+
+            // Verificar limite para despesas
+            if (tipo === 'despesa' && categoria.limite) {
+                const gastoAtual = calcularGastoCategoria(categoria.id);
+                const novoGasto = gastoAtual + valor;
+                const porcentagem = (novoGasto / categoria.limite) * 100;
+                
+                if (novoGasto > categoria.limite) {
+                    const confirmacao = confirm(
+                        `ATENÇÃO! Esta transação EXCEDERÁ o limite da categoria "${categoria.nome}".\n` +
+                        `Limite: R$ ${categoria.limite.toFixed(2)}\n` +
+                        `Gasto atual: R$ ${gastoAtual.toFixed(2)}\n` +
+                        `Novo gasto: R$ ${novoGasto.toFixed(2)} (${porcentagem.toFixed(1)}% do limite)\n\n` +
+                        `Deseja continuar mesmo assim?`
+                    );
+                    
+                    if (!confirmacao) {
+                        return;
+                    }
+                } else if (porcentagem > 80) {
+                    alert(
+                        `ALERTA! Esta transação fará com que você atinja ${porcentagem.toFixed(1)}% do limite da categoria "${categoria.nome}".\n` +
+                        `Limite: R$ ${categoria.limite.toFixed(2)}\n` +
+                        `Gasto atual: R$ ${gastoAtual.toFixed(2)}`
+                    );
+                }
+            }
+
+            const transacao = {
+                id: Date.now(),
+                tipo,
+                categoriaId: categoria.id,
+                categoria: categoria.nome,
+                descricao,
+                valor,
+                data
+            };
+
+            transacoes.push(transacao);
+            salvarDados();
+            atualizarListaTransacoes();
+            atualizarSaldo();
+            atualizarListaCategorias();
+            atualizarAlertasLimite();
+            atualizarResumoLimites();
+            atualizarEstatisticas();
+            formTransacao.reset();
+            
+            // Restaurar data atual
+            document.getElementById('data').value = new Date().toISOString().split('T')[0];
+            
+            alert('Transação adicionada com sucesso!');
+        }
+
+        function calcularGastoCategoria(categoriaId) {
+            const agora = new Date();
+            const mesAtual = agora.getMonth();
+            const anoAtual = agora.getFullYear();
+            
+            return transacoes
+                .filter(transacao => {
+                    if (transacao.tipo !== 'despesa' || transacao.categoriaId !== categoriaId) {
+                        return false;
+                    }
+                    
+                    const dataTransacao = new Date(transacao.data);
+                    return dataTransacao.getMonth() === mesAtual && 
+                           dataTransacao.getFullYear() === anoAtual;
+                })
+                .reduce((total, transacao) => total + transacao.valor, 0);
+        }
+
+        function atualizarListaTransacoes() {
+            listaTransacoes.innerHTML = '';
+            
+            let transacoesFiltradas = [...transacoes];
+            
+            // Aplicar filtros
+            if (filtrosAtivos.tipo) {
+                transacoesFiltradas = transacoesFiltradas.filter(t => t.tipo === filtrosAtivos.tipo);
+            }
+            
+            if (filtrosAtivos.categoria) {
+                const categoriaId = parseInt(filtrosAtivos.categoria);
+                transacoesFiltradas = transacoesFiltradas.filter(t => t.categoriaId === categoriaId);
+            }
+            
+            if (filtrosAtivos.dataInicio) {
+                transacoesFiltradas = transacoesFiltradas.filter(t => t.data >= filtrosAtivos.dataInicio);
+            }
+            
+            if (filtrosAtivos.dataFim) {
+                transacoesFiltradas = transacoesFiltradas.filter(t => t.data <= filtrosAtivos.dataFim);
+            }
+            
+            if (transacoesFiltradas.length === 0) {
+                listaTransacoes.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma transação encontrada</td></tr>';
+                return;
+            }
+
+            // Ordenar transações por data (mais recente primeiro)
+            const transacoesOrdenadas = transacoesFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            transacoesOrdenadas.forEach(transacao => {
+                const tr = document.createElement('tr');
+                tr.className = transacao.tipo === 'receita' ? 'transacao-receita' : 'transacao-despesa';
+                
+                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
+                const valorFormatado = transacao.valor.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+                
+                tr.innerHTML = `
+                    <td>${dataFormatada}</td>
+                    <td>${transacao.descricao}</td>
+                    <td>${transacao.categoria}</td>
+                    <td>${valorFormatado}</td>
+                    <td class="acoes">
+                        <button class="btn btn-danger btn-small" onclick="removerTransacao(${transacao.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                listaTransacoes.appendChild(tr);
+            });
+        }
+
+        function removerTransacao(id) {
+            if (confirm('Tem certeza que deseja excluir esta transação?')) {
+                transacoes = transacoes.filter(transacao => transacao.id !== id);
+                salvarDados();
+                atualizarListaTransacoes();
+                atualizarSaldo();
+                atualizarListaCategorias();
+                atualizarAlertasLimite();
+                atualizarResumoLimites();
+                atualizarEstatisticas();
+            }
+        }
+
+        function atualizarSaldo() {
+            const total = transacoes.reduce((acc, transacao) => {
+                return transacao.tipo === 'receita' ? acc + transacao.valor : acc - transacao.valor;
+            }, 0);
+            
+            saldoTotal.textContent = total.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            
+            if (total >= 0) {
+                saldoTotal.className = 'saldo-total saldo-positivo';
+            } else {
+                saldoTotal.className = 'saldo-total saldo-negativo';
+            }
+        }
+
+        function atualizarListaCategorias() {
+            listaCategorias.innerHTML = '';
+            
+            const categoriasReceita = categorias.filter(cat => cat.tipo === 'receita');
+            const categoriasDespesa = categorias.filter(cat => cat.tipo === 'despesa');
+            
+            // Exibir categorias de receita
+            if (categoriasReceita.length > 0) {
+                const tituloReceita = document.createElement('h3');
+                tituloReceita.innerHTML = '<i class="fas fa-arrow-up text-success"></i> Receitas';
+                tituloReceita.style.marginTop = '1rem';
+                tituloReceita.style.color = 'var(--success)';
+                listaCategorias.appendChild(tituloReceita);
+                
+                categoriasReceita.forEach(categoria => {
+                    const item = document.createElement('div');
+                    item.className = 'categoria-item';
+                    item.innerHTML = `
+                        <div class="categoria-info">
+                            <div class="categoria-icon">
+                                <i class="${categoria.icone}"></i>
+                            </div>
+                            <div>
+                                <div>${categoria.nome}</div>
+                            </div>
+                        </div>
+                        <div class="acoes">
+                            <button class="btn btn-warning btn-small" onclick="editarCategoria(${categoria.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="excluirCategoria(${categoria.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    listaCategorias.appendChild(item);
+                });
+            }
+            
+            // Exibir categorias de despesa
+            if (categoriasDespesa.length > 0) {
+                const tituloDespesa = document.createElement('h3');
+                tituloDespesa.innerHTML = '<i class="fas fa-arrow-down text-danger"></i> Despesas';
+                tituloDespesa.style.marginTop = '1rem';
+                tituloDespesa.style.color = 'var(--danger)';
+                listaCategorias.appendChild(tituloDespesa);
+                
+                categoriasDespesa.forEach(categoria => {
+                    const gastoAtual = calcularGastoCategoria(categoria.id);
+                    const porcentagem = categoria.limite ? (gastoAtual / categoria.limite) * 100 : 0;
+                    
+                    let classeProgresso = 'progresso-seguro';
+                    if (porcentagem > 100) classeProgresso = 'progresso-perigo';
+                    else if (porcentagem > 80) classeProgresso = 'progresso-alerta';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'categoria-item';
+                    item.innerHTML = `
+                        <div class="categoria-info">
+                            <div class="categoria-icon">
+                                <i class="${categoria.icone}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div>${categoria.nome}</div>
+                                ${categoria.limite ? `
+                                    <div class="progresso-limite">
+                                        <div class="progresso-bar ${classeProgresso}" style="width: ${Math.min(porcentagem, 100)}%"></div>
+                                    </div>
+                                    <div class="limite-info ${porcentagem > 100 ? 'limite-excedido' : ''}">
+                                        <span>R$ ${gastoAtual.toFixed(2)} / R$ ${categoria.limite.toFixed(2)}</span>
+                                        <span>${porcentagem > 100 ? 'EXCEDIDO!' : `${porcentagem.toFixed(1)}%`}</span>
+                                    </div>
+                                ` : '<div class="limite-info">Sem limite definido</div>'}
+                            </div>
+                        </div>
+                        <div class="categoria-limite">
+                            ${categoria.limite ? `Limite: R$ ${categoria.limite.toFixed(2)}` : 'Sem limite'}
+                        </div>
+                        <div class="acoes">
+                            <button class="btn btn-warning btn-small" onclick="editarCategoria(${categoria.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="excluirCategoria(${categoria.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    listaCategorias.appendChild(item);
+                });
+            }
+        }
+
+        function atualizarAlertasLimite() {
+            alertasLimite.innerHTML = '';
+            
+            const categoriasComLimite = categorias.filter(cat => cat.tipo === 'despesa' && cat.limite);
+            let alertas = [];
+            
+            categoriasComLimite.forEach(categoria => {
+                const gastoAtual = calcularGastoCategoria(categoria.id);
+                const porcentagem = (gastoAtual / categoria.limite) * 100;
+                
+                if (porcentagem > 100) {
+                    alertas.push({
+                        categoria: categoria.nome,
+                        mensagem: `Limite EXCEDIDO! Você gastou R$ ${gastoAtual.toFixed(2)} de R$ ${categoria.limite.toFixed(2)} (${porcentagem.toFixed(1)}%)`,
+                        tipo: 'perigo'
+                    });
+                } else if (porcentagem > 80) {
+                    alertas.push({
+                        categoria: categoria.nome,
+                        mensagem: `ALERTA! Você já utilizou ${porcentagem.toFixed(1)}% do limite (R$ ${gastoAtual.toFixed(2)} de R$ ${categoria.limite.toFixed(2)})`,
+                        tipo: 'alerta'
+                    });
+                }
+            });
+            
+            if (alertas.length === 0) {
+                alertasLimite.innerHTML = '<p>Nenhum alerta no momento. Todas as categorias estão dentro dos limites.</p>';
+                return;
+            }
+            
+            alertas.forEach(alerta => {
+                const div = document.createElement('div');
+                div.className = `alerta-limite ${alerta.tipo === 'perigo' ? 'alerta-perigo' : ''}`;
+                div.innerHTML = `
+                    <strong>${alerta.categoria}</strong><br>
+                    ${alerta.mensagem}
+                `;
+                alertasLimite.appendChild(div);
+            });
+        }
+
+        function atualizarResumoLimites() {
+            resumoLimites.innerHTML = '';
+            
+            const categoriasComLimite = categorias.filter(cat => cat.tipo === 'despesa' && cat.limite);
+            
+            if (categoriasComLimite.length === 0) {
+                resumoLimites.innerHTML = '<p>Nenhuma categoria com limite definido.</p>';
+                return;
+            }
+            
+            const resumoContainer = document.createElement('div');
+            resumoContainer.className = 'resumo-categorias';
+            
+            categoriasComLimite.forEach(categoria => {
+                const gastoAtual = calcularGastoCategoria(categoria.id);
+                const porcentagem = (gastoAtual / categoria.limite) * 100;
+                const restante = categoria.limite - gastoAtual;
+                
+                const item = document.createElement('div');
+                item.className = `resumo-item ${porcentagem > 100 ? 'excedido' : ''}`;
+                item.innerHTML = `
+                    <div class="resumo-item titulo">
+                        <i class="${categoria.icone}"></i>
+                        ${categoria.nome}
+                    </div>
+                    <div class="progresso-limite">
+                        <div class="progresso-bar ${porcentagem > 100 ? 'progresso-perigo' : porcentagem > 80 ? 'progresso-alerta' : 'progresso-seguro'}" 
+                             style="width: ${Math.min(porcentagem, 100)}%"></div>
+                    </div>
+                    <div class="limite-info">
+                        <span>Gasto: R$ ${gastoAtual.toFixed(2)}</span>
+                        <span>${porcentagem.toFixed(1)}%</span>
+                    </div>
+                    <div class="limite-info">
+                        <span>Limite: R$ ${categoria.limite.toFixed(2)}</span>
+                        <span>Restante: R$ ${restante > 0 ? restante.toFixed(2) : '0,00'}</span>
+                    </div>
+                `;
+                resumoContainer.appendChild(item);
+            });
+            
+            resumoLimites.appendChild(resumoContainer);
+        }
+
+        function atualizarEstatisticas() {
+            const agora = new Date();
+            const mesAtual = agora.getMonth();
+            const anoAtual = agora.getFullYear();
+            
+            // Filtrar transações do mês atual
+            const transacoesMes = transacoes.filter(transacao => {
+                const dataTransacao = new Date(transacao.data);
+                return dataTransacao.getMonth() === mesAtual && 
+                       dataTransacao.getFullYear() === anoAtual;
+            });
+            
+            // Calcular totais
+            const receitas = transacoesMes
+                .filter(t => t.tipo === 'receita')
+                .reduce((total, t) => total + t.valor, 0);
+                
+            const despesas = transacoesMes
+                .filter(t => t.tipo === 'despesa')
+                .reduce((total, t) => total + t.valor, 0);
+                
+            const saldo = receitas - despesas;
+            
+            // Contar categorias com limite
+            const categoriasComLimite = categorias.filter(cat => cat.tipo === 'despesa' && cat.limite).length;
+            
+            // Atualizar elementos
+            estatisticaReceitas.textContent = receitas.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            
+            estatisticaDespesas.textContent = despesas.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            
+            estatisticaSaldo.textContent = saldo.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            
+            if (saldo >= 0) {
+                estatisticaSaldo.style.color = 'var(--success)';
+            } else {
+                estatisticaSaldo.style.color = 'var(--danger)';
+            }
+            
+            estatisticaCategoriasLimite.textContent = categoriasComLimite;
+        }
+
+        function abrirModalCategoria(modo) {
+            modalCategoria.classList.remove('hidden');
+            if (modo === 'nova') {
+                modalTitulo.textContent = 'Nova Categoria';
+                formCategoria.reset();
+                grupoLimite.style.display = 'none';
+            }
+        }
+
+        function fecharModal() {
+            modalCategoria.classList.add('hidden');
+        }
+
+        function salvarCategoria() {
+            const tipo = document.getElementById('categoriaTipo').value;
+            const nome = document.getElementById('nomeCategoria').value;
+            const icone = document.getElementById('iconeCategoria').value;
+            const limite = tipo === 'despesa' ? 
+                (document.getElementById('limiteCategoria').value ? 
+                 parseFloat(document.getElementById('limiteCategoria').value) : null) : 
+                null;
+
+            // Verificar se já existe uma categoria com o mesmo nome e tipo
+            const categoriaExistente = categorias.find(cat => 
+                cat.nome.toLowerCase() === nome.toLowerCase() && cat.tipo === tipo
+            );
+            
+            if (categoriaExistente) {
+                alert('Já existe uma categoria com este nome para este tipo!');
+                return;
+            }
+
+            const novaCategoria = {
+                id: Date.now(),
+                tipo,
+                nome,
+                icone,
+                limite
+            };
+
+            categorias.push(novaCategoria);
+            salvarDados();
+            atualizarListaCategorias();
+            atualizarCategoriasSelect();
+            atualizarFiltroCategorias();
+            atualizarResumoLimites();
+            atualizarEstatisticas();
+            fecharModal();
+            alert('Categoria adicionada com sucesso!');
+        }
+
+        function editarCategoria(id) {
+            const categoria = categorias.find(cat => cat.id === id);
+            if (categoria) {
+                const novoNome = prompt('Editar nome da categoria:', categoria.nome);
+                if (novoNome && novoNome.trim() !== '') {
+                    categoria.nome = novoNome.trim();
+                    
+                    // Se for uma despesa, perguntar sobre o limite
+                    if (categoria.tipo === 'despesa') {
+                        const novoLimite = prompt('Editar limite da categoria (deixe em branco para nenhum limite):', categoria.limite || '');
+                        if (novoLimite !== null) {
+                            categoria.limite = novoLimite.trim() === '' ? null : parseFloat(novoLimite);
+                        }
+                    }
+                    
+                    salvarDados();
+                    atualizarListaCategorias();
+                    atualizarCategoriasSelect();
+                    atualizarFiltroCategorias();
+                    atualizarResumoLimites();
+                    atualizarEstatisticas();
+                    alert('Categoria atualizada com sucesso!');
+                }
+            }
+        }
+
+        function excluirCategoria(id) {
+            // Verificar se há transações usando esta categoria
+            const transacoesComCategoria = transacoes.filter(transacao => {
+                return transacao.categoriaId === id;
+            });
+            
+            if (transacoesComCategoria.length > 0) {
+                alert('Não é possível excluir esta categoria pois existem transações vinculadas a ela!');
+                return;
+            }
+            
+            if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                categorias = categorias.filter(cat => cat.id !== id);
+                salvarDados();
+                atualizarListaCategorias();
+                atualizarCategoriasSelect();
+                atualizarFiltroCategorias();
+                atualizarResumoLimites();
+                atualizarEstatisticas();
+                alert('Categoria excluída com sucesso!');
+            }
+        }
+
+        function salvarDados() {
+            localStorage.setItem('transacoes', JSON.stringify(transacoes));
+            localStorage.setItem('categorias', JSON.stringify(categorias));
+        }
+    </script>
+</body>
+</html>
